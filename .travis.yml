@@ -1,0 +1,61 @@
+sudo: required
+dist: trusty
+language: ruby
+
+before_install:
+before_install:
+- gem install asciidoctor -v 1.5.2
+- gem install tilt
+- sudo pip install git+https://github.com/gitenberg-dev/gitberg
+- sudo pip install pillow
+- sudo pip install cssutils
+- sudo pip install docutils
+- sudo pip install roman
+- sudo pip install git+https://github.com/gitenberg-dev/pg-epubmaker
+script:
+- VERSION=`ruby -e "require 'yaml'; meta = YAML.load_file('metadata.yaml'); puts meta['_version'];"`
+- git clone https://github.com/gitenberg-dev/asciidoctor-htmlbook.git
+- sudo pip install -r asciidoctor-htmlbook/gitberg-machine/requirements.txt
+
+- /usr/bin/python -c "from gitenberg import travis; travis.build_epub()"
+- ebook-convert book.epub book.mobi
+- xvfb-run ebook-convert book.epub book.pdf
+branches:
+  only:
+  - master
+notifications:
+  webhooks:
+    urls:
+      - https://unglue.it/api/travisci/webhook
+    on_success: always
+    on_failure: never
+    on_start: never
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: bsu6Fn0FHLzX7Q/cyfsIQzsH/W0dHEHy6fwOZienN7ZWZg3+Au8uKX2chy9K/C/ucIDh8OrE/xBqd2OPX3b5BUk9kIlJlYGmfjv+aNP8Mj9XUUhipwZhaN+1MLGbtn6tABG2zKi98U3K+7qAegCQ/TQKNBNHCgAVimArpcDqPnMYSelh7Vshlj2XyYGeF8sCdx9aY2CpxwK9FAtEESdG/lwhuxV4n/HnrI5/3NvD3fAwh3h7QHfsRCoZkDmYWKjoFnIpd2TTLKHmziyrdFQPaxlAoK5T8L774JtRU4ZUf2fqevdV4n7YDF50ZZxVSoeEqEXmo1ejFDjTnYpC3TMCRlt1VgO1APbSAb2DDfpvMY85q4lHuWHH458IFcoRRxaeggVERQ7TFd7rgCW5aKRCJKdO6k7oISB+4d6SdiKKsVDV2g/dUTvhMYepERJHCvBj9m9mJFB3DYYplFrIjQ4Kgi7PcRfYIIPlZePHbr12hIar/65DFpSC1WQ/J2oUD5eWjz2dcv13404NePYpLNTjgZWR5TstcTCEjskahDgXEfRlaDi5z6IGJJTt4H9lQ9MZi9FT6Qv3+eeO5J9SZToFj74WLm3dl7ClBMg8ymLKmuY+Ve3Ss/BarmE1AvpEKaRnpzBZrgVSr/HS6sQ4mZIYsUOIrzZUA6OioO9tM2r1Dh4=
+  file:
+    - book.epub
+    - book.mobi
+    - book.pdf
+  "on":
+    repo: GITenberg/The-Burning-Spear--Being-the-Experiences-of-Mr.-John-Lavender-in-the-Time-of-War_2905
+addons:
+  apt:
+    packages:
+    - xsltproc
+    - xvfb
+    - calibre
+    - python-pip
+    - git
+    - python-dev
+    - libjpeg-dev
+    - libpng-dev
+    - libfreetype6
+    - libfreetype6-dev
+    - zlib1g-dev
+    - python-lxml
+    - libxml2-dev
+    - libxslt1-dev
+    - tidy
